@@ -13,15 +13,6 @@ class RestaurantCategory(models.Model):
         return self.name
 
 
-class RestaurantImages(models.Model):
-    images = models.ImageField(upload_to='images/restaurant')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.images
-
-
 class Restaurant(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -39,14 +30,22 @@ class Restaurant(models.Model):
     longitude = models.CharField(max_length=2000, blank=True, null=True)
 
     category = models.ForeignKey(RestaurantCategory, on_delete=models.CASCADE)
-    picture = models.ForeignKey(RestaurantImages, on_delete=models.CASCADE,
-                                default='images/restaurant/default_restaurant.jpg')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+
+
+class RestaurantImages(models.Model):
+    images = models.ImageField(upload_to='images/restaurant')
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.images
 
 
 class RoomType(models.Model):
@@ -59,20 +58,10 @@ class RoomType(models.Model):
         return self.name
 
 
-class RoomImages(models.Model):
-    images = models.ImageField(upload_to='images/room')
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.images
-
-
 class RestaurantRoom(models.Model):
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, validators=[name_validator], unique=True)
     description = models.TextField(blank=True, null=True)
-    pictures = models.ForeignKey(RoomImages, on_delete=models.CASCADE, default='images/room/default_room.jpg')
 
     people_number = models.IntegerField(default=0)
     room_type = models.ForeignKey(RoomType, on_delete=models.CASCADE)
@@ -82,6 +71,16 @@ class RestaurantRoom(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RoomImages(models.Model):
+    images = models.ImageField(upload_to='images/room')
+    restaurant_room = models.ForeignKey(RestaurantRoom, on_delete=models.CASCADE)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.images
 
 
 class MenuType(models.Model):

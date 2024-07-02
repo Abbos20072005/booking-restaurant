@@ -18,14 +18,14 @@ class CategoryCreateSerializer(ModelSerializer):
 class RestaurantSerializer(ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ['id', 'author', 'name', 'description', 'picture', 'service_fee', 'balance', 'booking_count_total',
+        fields = ['id', 'author', 'name', 'description', 'service_fee', 'balance', 'booking_count_total',
                   'booking_count_day_by_day', 'address', 'phone', 'email', 'category']
 
 
 class RestaurantCreateSerializer(ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ['author', 'name', 'category']
+        fields = ['name', 'category', 'author']
 
 
 class RoomTypeSerializer(ModelSerializer):
@@ -95,3 +95,5 @@ class CommentCreateSerializer(ModelSerializer):
     class Meta:
         model = Comment
         fields = ['restaurant', 'menu', 'comment', 'rating']
+
+
