@@ -13,7 +13,7 @@ class IsManager(permissions.BasePermission):
         return False
 
 
-class IsAdministrator(permissions.BasePermission):
+class IsManagerOrAdministrator(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.status == 4:
             return True
