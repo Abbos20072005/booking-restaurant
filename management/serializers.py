@@ -1,19 +1,5 @@
 from rest_framework import serializers
-from .models import Manager, Administrator
-from authentication.models import User
-
-
-class ManagerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Manager
-        fields = ['user', 'phone_number', 'date_of_birth', 'hire_date']
-        read_only_fields = ['user']
-
-    def save(self, **kwargs):
-        request = self.context['request']
-        user = User.objects.filter(user_id=request.user.id).first()
-        self.validated_data['user'] = user
-        return super().save(**kwargs)
+from .models import Administrator
 
 
 class AdministratorSerializer(serializers.ModelSerializer):

@@ -18,6 +18,25 @@ from drf_yasg import openapi
 
 
 class ManagementViewSet(viewsets.ViewSet):
+    @swagger_auto_schema(
+        operation_description="Retrieve a restaurant detail",
+        operation_summary="Get restaurant details",
+        responses={
+            200: openapi.Response(
+                description='Restaurant detail',
+            ),
+            404: openapi.Response(
+                description='Restaurant not found',
+            )
+        },
+    )
+    @permission_classes([IsAuthenticated, IsManager])
+    def retrieve_restaurant(self, request, rest_id):
+        exists = Restaurant.objects.filter(pk=rest_id)
+        if not exists.exists():
+            return Response(data={'error': 'Restaurant not found'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = RestaurantSerializer(exists.first())
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Show the balance of a restaurant",
@@ -120,49 +139,6 @@ class ManagementViewSet(viewsets.ViewSet):
         return Response(data={"message": 'Restaurant deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
     @swagger_auto_schema(
-        operation_description="Retrieve a restaurant detail",
-        operation_summary="Get restaurant details",
-        responses={
-            200: openapi.Response(
-                description='Restaurant detail',
-            ),
-            404: openapi.Response(
-                description='Restaurant not found',
-            )
-        },
-    )
-    @permission_classes([IsAuthenticated, IsManager])
-    def retrieve_restaurant(self, request, rest_id):
-        exists = Restaurant.objects.filter(pk=rest_id)
-        if not exists.exists():
-            return Response(data={'error': 'Restaurant not found'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = RestaurantSerializer(exists.first())
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
-        operation_description="Delete the booking",
-        operation_summary="Delete booking",
-        responses={
-            204: openapi.Response(
-                description='Booking deleted Successfully',
-            ),
-            404: openapi.Response(
-                description='Restaurant or Booking not found'
-            )
-        },
-    )
-    @permission_classes([IsAuthenticated, IsManager])
-    def delete_booking(self, request, rest_id, booking_id):
-        restaurant = Restaurant.objects.filter(pk=rest_id)
-        if not restaurant.exists():
-            return Response(data={'error': 'Restaurant not found'}, status=status.HTTP_404_NOT_FOUND)
-        booking_exists = Booking.objects.filter(pk=booking_id, restaurants_id=rest_id)
-        if not booking_exists.exists():
-            return Response(data={'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
-        booking_exists.first().delete()
-        return Response(data={'message': 'Booking deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
-
-    @swagger_auto_schema(
         operation_description="Create a new admin",
         operation_summary="Add an admin",
         request_body=AdministratorSerializer,
@@ -211,15 +187,13 @@ class ManagementViewSet(viewsets.ViewSet):
         },
     )
     @permission_classes([IsAuthenticated, IsManager])
-    def delete_admin(self, request, rest_id):
-        admin_exists = Administrator.objects.filter(managager__restaurant_id=rest_id).exists()
+    def delete_admin(self, request, rest_id, admin_id):
+        admin_exists = Administrator.objects.filter(pk=admin_id, managager__restaurant_id=rest_id).exists()
         if not admin_exists.exists():
             return Response(data={'error': 'Admin not found'}, status=status.HTTP_404_NOT_FOUND)
         admin_exists.first().delete()
         return Response(data={'message': 'Admin deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-
-class AdministratorViewSet(viewsets.ViewSet):
     @swagger_auto_schema(
         operation_description="Create booking",
         operation_summary="Add booking",
@@ -315,3 +289,26 @@ class AdministratorViewSet(viewsets.ViewSet):
         booking.status = 5
         booking.save(update_fields=['status'])
         return Response(data={'status': 'Booking cancelled'}, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Delete the booking",
+        operation_summary="Delete booking",
+        responses={
+            204: openapi.Response(
+                description='Booking deleted Successfully',
+            ),
+            404: openapi.Response(
+                description='Restaurant or Booking not found'
+            )
+        },
+    )
+    @permission_classes([IsAuthenticated, IsManager])
+    def delete_booking(self, request, rest_id, booking_id):
+        restaurant = Restaurant.objects.filter(pk=rest_id)
+        if not restaurant.exists():
+            return Response(data={'error': 'Restaurant not found'}, status=status.HTTP_404_NOT_FOUND)
+        booking_exists = Booking.objects.filter(pk=booking_id, restaurants_id=rest_id)
+        if not booking_exists.exists():
+            return Response(data={'error': 'Booking not found'}, status=status.HTTP_404_NOT_FOUND)
+        booking_exists.first().delete()
+        return Response(data={'message': 'Booking deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
