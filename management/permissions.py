@@ -1,25 +1,27 @@
 from rest_framework import permissions
-from .models import Manager, Administrator
+from .models import Manager
 
 
 class IsManager(permissions.BasePermission):
-
-
     def has_object_permission(self, request, view, obj):
+        if request.user.status == 3 and Manager.objects.filter(restaurant_id=obj.id).exists():
+            return True
+        return False
 
-        return request.user.status == 3 and Manager.objects.filter(user_id=request.user.id,
-                                                                   restaurant_id=obj.id).exists()
+    def has_permission(self, request, view):
+        if request.user.status == 3:
+            return True
+        return False
 
 
 class IsManagerOrAdministrator(permissions.BasePermission):
-
-
     def has_object_permission(self, request, view, obj):
+        if request.user.status == 4:
+            return True
+        return False
 
-        if request.user.status == 3:
-            return Manager.objects.filter(user_id=request.user.id, restaurant_id=obj.id).exists()
+    def has_permission(self, request, view):
 
         if request.user.status == 4:
-            return Administrator.objects.filter(user_id=request.user.id, manager__restaurant_id=obj.id).exists()
-
+            return True
         return False
